@@ -23,7 +23,7 @@ public class PersonneCRUDTest {
 	@Test
 	public void testAjouterPersonneIdAuto() {
 		System.out.println("==================== TEST AJOUT PERSONNE ID AUTO ===============================");
-		// Compter le nombre de biens dans la base
+		// Compter le nombre de personnes dans la base
 
 		int nbTotalPersonnesAvantAjout = personneCRUD.nombreTotalPersonnes();
 

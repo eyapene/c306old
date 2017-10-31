@@ -43,6 +43,12 @@ public class Bien {
 		this.nature = nature;
 	}
 
+	public Bien(String nature, int idProprietaire) {
+		this.nature = nature;
+		PersonneCRUD personneCRUD = new PersonneCRUD();
+		this.proprietaire = personneCRUD.getPersonneById(idProprietaire);
+	}
+
 	public int getAdresse() {
         return this.adresse;
     }
@@ -67,8 +73,8 @@ public class Bien {
     }
     
     public String toString(){
-    	int addr = this.adresse;
-		return "Bien à l'adresse : " + addr;
+ 
+		return "Bien à l'adresse : " + adresse + ", Nature : " + nature + ", Propriétaire : " + proprietaire;
     	
     }
     
