@@ -14,9 +14,13 @@ public class PersonneTest {
 		
 		//Personne personne2 = new Personne("NOM PERSONNE 1", "PrenomPersonne1", "AdressePersonne1");
 		
-		Personne personne = new Personne("NOM PERSONNE OBJET SANS FLUSH", "PrenomPersonneObjetSansFlushadresse", "AdressePersonneObjetSansFlush");
+		Personne personne = new Personne("NOM PERSONNE OBJET SANS FLUSH", 
+				"PrenomPersonneObjetSansFlushadresse", 
+				"AdressePersonneObjetSansFlush");
 		
-		Personne personne2 = new Personne("NOM PERSONNE OBJET SANS FLUSH", "PrenomPersonneObjetSansFlushadresse", "AdressePersonneObjetSansFlush");
+		Personne personne2 = new Personne("NOM PERSONNE OBJET SANS FLUSH", 
+				"PrenomPersonneObjetSansFlushadresse", 
+				"AdressePersonneObjetSansFlush");
 		
 		boolean comparaisonAvantModif = personne.comparer(personne2);
 		

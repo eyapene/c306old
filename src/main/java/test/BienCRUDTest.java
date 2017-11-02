@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -12,6 +13,7 @@ import org.junit.Test;
 
 import com.janus.mvn.crous.draft.crud.BienCRUD;
 import com.janus.mvn.crous.draft.crud.PersonneCRUD;
+import com.janus.mvn.crous.draft.crud.exception.ObjetDejaExistantDansLaTableException;
 import com.janus.mvn.crous.draft.entites.Bien;
 import com.janus.mvn.crous.draft.entites.Personne;
 import com.janus.mvn.crous.draft.pontjdbc.PontJDBC;
@@ -27,12 +29,18 @@ public class BienCRUDTest {
 		System.out.println("==================== TEST PURGE TABLE BIEN ===============================");
 
 		bienCRUD.flushBienTable();
-
+		
+		Personne proprietaire = new Personne("Nom Personne pour test Flush Bien", 
+											"Prenom Personne pour test Flush Bien", 
+											"Adresse Personne pour test Flush Bien");
+		personneCRUD.flushPersonneTable();
+		personneCRUD.ajouterObjetPersonne(proprietaire);
+		
 		try {
 			PreparedStatement ps = PontJDBC
 					.getPreparedStatement("INSERT INTO bien(nature, idProprietaire) VALUES (?,?)");
-			ps.setString(1, "NATURE");
-			ps.setInt(2, 388);
+			ps.setString(1, "NATURE POUR TEST FLUSH BIEN");
+			ps.setInt(2, personneCRUD.getDernierId());
 			ps.executeUpdate();
 		} catch (SQLException | ClassNotFoundException ex) {
 			Logger.getLogger(PontJDBC.class.getName()).log(Level.SEVERE, null, ex);
@@ -59,8 +67,10 @@ public class BienCRUDTest {
 	public void testGetDernierId() {
 		System.out.println("==================== TEST RECUP DERNIER ID ===============================");
 		int dernierIdAvantInsertion = bienCRUD.getDernierId();
+		System.out.println("dernierIdAvantInsertion : " + dernierIdAvantInsertion);
 		bienCRUD.ajouterBien("Nature test Get dernier Id", personneCRUD.getDernierId());
 		int dernierIdApresInsertion = bienCRUD.getDernierId();
+		System.out.println("dernierIdApresInsertion : " + dernierIdApresInsertion);
 		assertEquals("Test get dernier id", dernierIdAvantInsertion + 1, dernierIdApresInsertion);
 	}
 	
@@ -93,12 +103,106 @@ public class BienCRUDTest {
 		bienCRUD.flushBienTable();
 		int nbTotalBiensAvantAjout = bienCRUD.nombreTotalBiens();
 		System.out.println("Avant : " + nbTotalBiensAvantAjout);
-//		int lastInsertId = bienCRUD.getDernierId();
+		int lastInsertId = bienCRUD.getDernierId();
 		Bien bien = new Bien("Nature Test Ajout Objet", personneCRUD.getDernierId());
-		bienCRUD.ajouterObjetBien(bien);
+		// Bien bien = new Bien("Nature", 59);
+		try{
+			bienCRUD.ajouterObjetBien(bien);
+		}catch (Exception e) {
+			e.printStackTrace();
+		}
+		
 		int nbTotalBiensApresAjout = bienCRUD.nombreTotalBiens();
 		System.out.println("Après : " + nbTotalBiensApresAjout);
 		assertEquals("Comptage", nbTotalBiensAvantAjout + 1, nbTotalBiensApresAjout);
+	}
+	
+	@Test
+	public void testMajBien(){
+		System.out.println("==================== TEST MAJ BIEN ===============================");
+		Bien bienAvantModif = bienCRUD.getDernierBien();
+		Bien bienModifie = new Bien(bienAvantModif.getAdresse(), bienAvantModif.getNature(), bienAvantModif.getProprietaire().getId());
+		bienModifie.setNature(bienModifie.getNature() + " (modifiée pour test Mise à jour)");
+		bienCRUD.majBien(bienModifie);
+		Bien bienApresModifRecupere = bienCRUD.getBienbyId(bienAvantModif.getAdresse());
+		System.out.println("bienAvantModif.getNature() 		   : " + bienAvantModif.getNature());
+		System.out.println("bienApresModifRecupere.getNature() : " + bienApresModifRecupere.getNature());
+		assertNotEquals(bienApresModifRecupere.getNature(), bienAvantModif.getNature());
+	}
+	
+	@Test
+	public void testGetBienById(){
+		System.out.println("==================== TEST RECUPERATION BIEN BY ID ===============================");
+		int dernierId = bienCRUD.getDernierId();
+		System.out.println("Dernier Id : " + dernierId);
+		//bienCRUD.flushBienTable();
+		Personne personne = new Personne("Nom12212", "Prenom", "Adresse");
+		personneCRUD.ajouterObjetPersonne(personne);
+		bienCRUD.ajouterBien("Villa", personneCRUD.getDernierId());
+		Bien bienRecup = bienCRUD.getBienbyId(dernierId+1);
+		System.out.println("bienRecup.getAdresse() : " + bienRecup.getAdresse());
+		assertEquals("Test récupération d'un bien.", dernierId + 1, bienRecup.getAdresse());
+	}
+	
+	@Test
+	public void testSupprimerBien(){
+		System.out.println("==================== TEST SUPPRESSION BIEN ===============================");
+
+		// Flush de la table bien
+		bienCRUD.flushBienTable();
+
+		Personne personne = new Personne("Nom", "Prenom", "Adresse");
+		personneCRUD.flushPersonneTable();
+		personneCRUD.ajouterObjetPersonne(personne);
+		
+		Bien bien = new Bien("NATURE POUR TEST DE SUPPRESSION", personneCRUD.getDernierId());
+		try {
+			bienCRUD.ajouterObjetBien(bien);
+		} catch (ObjetDejaExistantDansLaTableException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		// Suppression du 1er élément
+		bienCRUD.deleteBien(bien);
+
+		// Compter à nouveau le nombre de biens dans la bdd
+		int nbTotalBiensApresSuppression = bienCRUD.nombreTotalBiens();
+
+		assertNotEquals("Test Suppression bien.", 0, nbTotalBiensApresSuppression);
+	}
+	
+	@Test
+	public void testVerifierUnicite(){
+		bienCRUD.flushBienTable();
+		Personne personne = new Personne("Nom", "Prenom", "Adresse");
+		personneCRUD.flushPersonneTable();
+		personneCRUD.ajouterObjetPersonne(personne);
+		Bien bien = new Bien("Nature", personneCRUD.getDernierId());
+		try {
+			bienCRUD.ajouterObjetBien(bien);
+		} catch (ObjetDejaExistantDansLaTableException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		assertEquals(true, bienCRUD.verifierUniciteBool(bien));
+	}
+	
+	@Test
+	public void testListeBiens() {
+
+		System.out.println("==================== TEST LISTE BIENS ===============================");
+
+		// Compter le nombre de biens dans la bdd
+		int nbTotalBiensAvantRecup = bienCRUD.nombreTotalBiens();
+
+		// Recupération de la liste
+		List<Bien> listeBiensRecup = bienCRUD.recupererListeBiens();
+
+		// Comptage du nombre de biens de la liste
+		int nbBiensRecup = listeBiensRecup.size();
+
+		assertEquals("Test Liste", nbTotalBiensAvantRecup, nbBiensRecup);
 	}
 		
 //	@Test
@@ -153,24 +257,6 @@ public class BienCRUDTest {
 //		assertEquals("Test récupération d'un bien", idBienACreer, bienRecup.getAdresse());
 //	}
 //	
-//	@Test
-//	public void testSuppressionBien(){
-//		
-//		System.out.println("==================== TEST SUPPRESSION BIEN ===============================");
-//		
-//		// Comptage
-//		int nbTotalAvantSuppression = bienCRUD.nombreTotalBiens();
-//		
-//		// Suppression du 1er élément
-//		int idPremierElement = bienCRUD.getPremierBien().getAdresse();
-//		Boolean suppression = bienCRUD.deleteBienById(idPremierElement);
-//		
-//		// Recomptage
-//		int nbTotalApresSuppression = bienCRUD.nombreTotalBiens();
-//		
-//		assertNotEquals("Test Suppression", nbTotalApresSuppression, nbTotalAvantSuppression);
-//		
-//		
-//	}
+
 
 }

@@ -209,7 +209,7 @@ public class PersonneCRUDTest {
 		// Suppression du 1er élément
 		personneCRUD.deleteObjetPersonne(personne);
 
-		// Compter à nouveau le nombre de biens dans la bdd
+		// Compter à nouveau le nombre de personnes dans la bdd
 		int nbTotalPersonnesApresSuppression = personneCRUD.nombreTotalPersonnes();
 
 		assertNotEquals("Test Suppression", 0, nbTotalPersonnesApresSuppression);
@@ -302,5 +302,31 @@ public class PersonneCRUDTest {
 		personneCRUD.ajouterObjetPersonne(personne);
 		assertEquals(true, personneCRUD.verifierUniciteBool(personne));
 	}
+	
+	@Test
+	public void testUpdatePersonne(){
+		System.out.println("==================== TEST MAJ PERSONNE ===============================");
+		Personne personneAvantModif = personneCRUD.getDernierePersonne();
+		Personne personneModifiee = new Personne(personneAvantModif.getId(), 
+												personneAvantModif.getNom(), 
+												personneAvantModif.getPrenom(), 
+												personneAvantModif.getAdresse());
+		personneModifiee.setAdresse(personneModifiee.getAdresse() + " (modifiée pour test Mise à jour)");
+		personneCRUD.update(personneModifiee);
+		Personne personneApresModifRecupere = personneCRUD.getPersonneById(personneAvantModif.getId());
+//		System.out.println("bienAvantModif.getNature() 		   : " + bienAvantModif.getNature());
+//		System.out.println("bienApresModifRecupere.getNature() : " + bienApresModifRecupere.getNature());
+		assertNotEquals(personneApresModifRecupere.getAdresse(), personneAvantModif.getAdresse());
+	}
+	
+	@Test
+	public void testGetDernierePersonne(){
+		System.out.println("==================== TEST RECUP DERNIERE PERSONNE ===============================");
+		int dernierIdAvantInsertion = personneCRUD.getDernierePersonne().getId();
+		personneCRUD.ajouterPersonneIdAuto("Nom Personne Test récup dernière personne", "Prenom", "Adresse");
+		int dernierIdApresInsertion = personneCRUD.getDernierePersonne().getId();
+		assertEquals("Test get dernière personne", dernierIdAvantInsertion + 1, dernierIdApresInsertion);
+	}
+
 
 }

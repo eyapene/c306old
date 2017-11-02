@@ -11,7 +11,8 @@ public class PontJDBC {
         
 		PreparedStatement ps = null;
         Class.forName("com.mysql.jdbc.Driver");
-        String url = "jdbc:mysql://localhost:3306/bd_crous_test";
+        // String url = "jdbc:mysql://localhost:3306/bd_crous_test";
+        String url = "jdbc:mysql://localhost:3306/bd_crous_test_2";
         String user = "root";
         String pass = "";
         Connection con = DriverManager.getConnection(url, user, pass);

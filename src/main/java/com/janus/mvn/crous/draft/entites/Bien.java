@@ -14,28 +14,29 @@ import com.janus.mvn.crous.draft.crud.PersonneCRUD;
  * @author k.atsou
  */
 public class Bien {
-    
-    private int adresse;
-    
-    private Personne proprietaire;
-    
-    private String nature;
 
-    public Bien(int adresse, Personne proprietaire, String nature) {
-        this.adresse = adresse;
-        this.proprietaire = proprietaire;
-        this.nature = nature;
-    }
+	private int adresse;
 
-    public Bien() {
-    }
+	private Personne proprietaire;
 
-    public Bien(int adresse) {
+	private String nature;
+
+	public Bien(int adresse, Personne proprietaire, String nature) {
+		this.adresse = adresse;
+		this.proprietaire = proprietaire;
+		this.nature = nature;
+	}
+
+	public Bien() {
+	}
+
+	public Bien(int adresse) {
 		this.adresse = adresse;
 	}
 
 	public Bien(int adresse, String nature, int idProprietaire) {
-		// Personne proprio = new Personne(idProprietaire, "Dupont", "Jean", "Rue du Lac");
+		// Personne proprio = new Personne(idProprietaire, "Dupont", "Jean",
+		// "Rue du Lac");
 		PersonneCRUD personneCRUD = new PersonneCRUD();
 		Personne proprio = personneCRUD.getPersonneById(idProprietaire);
 		this.adresse = adresse;
@@ -50,32 +51,42 @@ public class Bien {
 	}
 
 	public int getAdresse() {
-        return this.adresse;
-    }
+		return this.adresse;
+	}
 
-    public void setAdresse(int adresse) {
-        this.adresse = adresse;
-    }
+	public void setAdresse(int adresse) {
+		this.adresse = adresse;
+	}
 
-    public Personne getProprietaire() {
-        return proprietaire;
-    }
+	public Personne getProprietaire() {
+		return proprietaire;
+	}
 
-    public void setProprietaire(Personne proprietaire) {
-        this.proprietaire = proprietaire;
-    }
-    public String getNature() {
-        return nature;
-    }
+	public void setProprietaire(Personne proprietaire) {
+		this.proprietaire = proprietaire;
+	}
 
-    public void setNature(String nature) {
-        this.nature = nature;
-    }
-    
-    public String toString(){
- 
+	public String getNature() {
+		return nature;
+	}
+
+	public void setNature(String nature) {
+		this.nature = nature;
+	}
+
+	public String toString() {
+
 		return "Bien à l'adresse : " + adresse + ", Nature : " + nature + ", Propriétaire : " + proprietaire;
-    	
-    }
-    
+
+	}
+
+	public boolean comparer(Bien bienCiblePourComparaison) {
+		if (this.nature.equalsIgnoreCase(bienCiblePourComparaison.getNature()) && 
+			this.proprietaire.comparer(bienCiblePourComparaison.getProprietaire())) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
 }

@@ -128,9 +128,9 @@ public class PersonneCRUD {
 			ps.setString(2, nom);
 			ps.setString(3, prenom);
 			ps.setString(4, adresse);
-			if (!verifierUniciteBool(personne)){
+			if (!verifierUniciteBool(personne)) {
 				ps.executeUpdate();
-			}else{
+			} else {
 				throw new RuntimeException("La personne a ajouter existe deja dans la base");
 			}
 		} catch (SQLException | ClassNotFoundException ex) {
@@ -149,9 +149,9 @@ public class PersonneCRUD {
 			ps.setString(1, nom);
 			ps.setString(2, prenom);
 			ps.setString(3, adresse);
-			if (!verifierUniciteBool(personne)){
+			if (!verifierUniciteBool(personne)) {
 				ps.executeUpdate();
-			}else{
+			} else {
 				throw new RuntimeException("La personne a ajouter existe deja dans la base");
 			}
 		} catch (SQLException | ClassNotFoundException ex) {
@@ -182,8 +182,8 @@ public class PersonneCRUD {
 			}
 		}
 	}
-	
-	public boolean verifierUniciteBool(Personne personne){
+
+	public boolean verifierUniciteBool(Personne personne) {
 		boolean retour = true;
 		Personne personne1 = new Personne("NOM PERSONNE OBJET SANS FLUSH", "PrenomPersonneObjetSansFlushadresse",
 				"AdressePersonneObjetSansFlush");
@@ -192,8 +192,8 @@ public class PersonneCRUD {
 				"AdressePersonneObjetSansFlush");
 		System.out.println("Test comparaison : " + personne1.comparer(personne2));
 		List<Personne> listePersonneRecup = recupererListePersonnes();
-		if (listePersonneRecup.size()==0) {
-			return false;			
+		if (listePersonneRecup.size() == 0) {
+			return false;
 		}
 		for (Personne p : listePersonneRecup) {
 			String nomPerso = p.getNom(), prenomPerso = p.getPrenom(), adressePerso = p.getAdresse();
@@ -206,7 +206,7 @@ public class PersonneCRUD {
 			System.out.println("Résultat : " + perso.comparer(personne));
 			if (perso.comparer(personne)) {
 				retour = true;
-			}else{
+			} else {
 				retour = false;
 			}
 		}
@@ -249,5 +249,51 @@ public class PersonneCRUD {
 		}
 		System.out.println("La liste des personnes a été bien récupérée");
 		return listePersonnes;
+	}
+
+	public Personne getDernierePersonne() {
+		ResultSet rs;
+		Personne personne = new Personne();
+		try {
+			PreparedStatement ps = PontJDBC
+					.getPreparedStatement("SELECT * FROM personne ORDER BY idPersonne DESC LIMIT 1");
+			rs = ps.executeQuery();
+			while (rs.next()) {
+				personne.setId(rs.getInt(1));
+				personne.setNom(rs.getString(2));
+				personne.setPrenom(rs.getString(3));
+				personne.setAdresse(rs.getString(4));
+			}
+		} catch (SQLException | ClassNotFoundException ex) {
+			System.out.println("Erreur de récupération de la dernière personne");
+			Logger.getLogger(PontJDBC.class.getName()).log(Level.SEVERE, null, ex);
+		}
+		System.out.println("La dernière personne été bien récupéré");
+		return personne;
+	}
+
+	public void update(Personne personneModifiee) {
+		
+			try{
+				PreparedStatement ps = PontJDBC.getPreparedStatement("UPDATE personne SET nom = ?, "
+						+ "prenom = ?, adresse = ? WHERE idPersonne = ?");
+					ps.setString(1, personneModifiee.getNom());
+					ps.setString(2, personneModifiee.getPrenom());
+					ps.setString(3, personneModifiee.getAdresse());
+					ps.setInt(4, personneModifiee.getId());
+					ps.executeUpdate();
+			}catch (ClassNotFoundException e) {
+				e.printStackTrace();
+			} catch (SQLException e){
+				e.printStackTrace();
+			}
+			
+//			if (!verifierUniciteBool(personne)){
+				
+//			}else{
+//				throw new RuntimeException("La personne a ajouter existe deja dans la base");
+//			}
+		
+		System.out.println("La personne a été modifiée avec succès");
 	}
 }
